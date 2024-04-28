@@ -3,7 +3,7 @@ import { homeSubItemModel } from '../../models/homeSubListModel'
 @Component
 export default struct HomeSubListItemView{
 
-  @Prop item:homeSubItemModel={} as homeSubItemModel
+  @Prop item:homeSubItemModel
 
   @State difficulty:number=this.item.difficulty
 

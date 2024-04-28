@@ -1,34 +1,34 @@
 import { homeSubItemModel, homeSubListModel } from '../../models/homeSubListModel'
 import { http } from '@kit.NetworkKit'
 import HomeSubListItemView from '../home/HomeSubListItemView'
+import { allResponse } from '../../common/utils/myReq'
 
 @Component
 export default struct searchListView{
 
-  @Link keyword:string
+  @Consume keyword:string
   @State listItems:homeSubItemModel[]=[]
   @State loadingFlag:boolean=true
-  @Watch("searchReq") @Consume isSearch:boolean
+  @Consume @Watch("searchReq")  isSearch:boolean
   searchReq(){
-    if(this.isSearch===true)
-      this.loadingFlag=true
-    this.loading()
+    if(this.isSearch===true) {
+      this.loadingFlag = true
+      this.loading()
+    }
   }
-   aboutToAppear(): void {
-    this.loading()
-   }
-
   private async loading() {
+    console.log('start loading...')
     let req = http.createHttp()
-    const res = await req.request(`https://api-harmony-teach.itheima.net/hm/question/list?questionBankType=10&keyword=${this.keyword}`)
-    let result = (JSON.parse(res.result.toString()) as homeSubListModel).rows
+    const res = await req.request(`https://api-harmony-teach.itheima.net/hm/question/list?questionBankType=10&keyword=vue`)
+    let result = (JSON.parse(res.result.toString()) as allResponse<homeSubListModel>).data.rows
+    console.log(`result:${JSON.stringify(result)}`)
     this.listItems = result
     this.isSearch=false
     this.loadingFlag=false
+    this.keyword=''
+    console.log('end loading...')
   }
-
   build() {
-
     Column(){
       if(this.loadingFlag===false)
       List(){
@@ -37,14 +37,15 @@ export default struct searchListView{
             HomeSubListItemView({item:item})
           }
         })
-      }.width('100%')
+        ListItem(){
+          Text('加载成功')
+        }
+      }.width('100%').padding(20)
       else{
         Row(){
           Text('加载中。。。')
         }
       }
     }
-
   }
-
 }
