@@ -1,3 +1,5 @@
+import searchListView from '../views/search/searchList'
+
 PersistentStorage.persistProp<string[]>('searchRecord',[])
 @Entry
 @Component
@@ -5,6 +7,7 @@ struct searchPage{
   @StorageLink('searchRecord') arr:string[]=[]
   @State searchText:string=''
   @State delete:boolean=false
+  @Provide isSearch:boolean=false
   build() {
     Navigation(){
       Column({space:16}){
@@ -14,6 +17,7 @@ struct searchPage{
               .onSubmit(()=>{
                 this.arr.push(this.searchText)
                 this.searchText=''
+                this.isSearch=true
               })
               .layoutWeight(1)
             if(this.searchText!='')
@@ -46,6 +50,9 @@ struct searchPage{
             })
           }.width('93%')
         }
+
+        searchListView({keyword:this.searchText})
+
       }
     }.title('刷个面试题')
     .titleMode(NavigationTitleMode.Mini)

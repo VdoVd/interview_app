@@ -3,11 +3,17 @@ import { http } from '@kit.NetworkKit'
 import HomeSubListItemView from '../home/HomeSubListItemView'
 
 @Component
-export default struct search{
+export default struct searchListView{
 
   @Link keyword:string
   @State listItems:homeSubItemModel[]=[]
-  @State loadingFlag:boolean=false
+  @State loadingFlag:boolean=true
+  @Watch("searchReq") @Consume isSearch:boolean
+  searchReq(){
+    if(this.isSearch===true)
+      this.loadingFlag=true
+    this.loading()
+  }
    aboutToAppear(): void {
     this.loading()
    }
@@ -17,6 +23,8 @@ export default struct search{
     const res = await req.request(`https://api-harmony-teach.itheima.net/hm/question/list?questionBankType=10&keyword=${this.keyword}`)
     let result = (JSON.parse(res.result.toString()) as homeSubListModel).rows
     this.listItems = result
+    this.isSearch=false
+    this.loadingFlag=false
   }
 
   build() {
