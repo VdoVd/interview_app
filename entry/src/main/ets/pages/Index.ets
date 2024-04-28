@@ -1,7 +1,7 @@
 import { Home } from '../views/home/Home'
 import { Project } from '../views/project/Project'
 import { Interview } from '../views/interview/Interview'
-import { Mine } from '../views/mime/Mine'
+import MineContentPartView from '../views/mime/MineContentView'
 
 
 @Entry
@@ -46,7 +46,7 @@ struct Index {
 
         TabContent() {
           if(this.currentIndex === 3){
-            Mine()
+            MineContentPartView()
           }
         }.tabBar(this.TabBarBuilder('我的', 3, $r('app.media.ic_tabbar_interview'),
           $r('app.media.ic_tabbar_interview_select')))
@@ -58,3 +58,5 @@ struct Index {
     .height('100%')
   }
 }
+
+
