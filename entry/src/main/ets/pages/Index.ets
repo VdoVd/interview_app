@@ -1,7 +1,7 @@
 import { Home } from '../views/home/Home'
 import { Project } from '../views/project/Project'
 import { Interview } from '../views/interview/Interview'
-import MineContentPartView from '../views/mime/MineContentView'
+import MineContentPartView from '../views/mine/MineContentView'
 
 
 @Entry

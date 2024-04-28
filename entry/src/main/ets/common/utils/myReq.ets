@@ -24,6 +24,8 @@ export interface userData{
   clockinNumber:number
 }
 
+
+
 interface hasClock{
   flag:boolean
 }
@@ -156,4 +158,47 @@ export const getClockInDays=()=>{
     }
   })
 
+}
+
+export const getUserInfo=()=>{
+  return req.request('https://api-harmony-teach.itheima.net/hm/userInfo',{
+    method:http.RequestMethod.POST,
+    header:{
+      contentType: 'application/json',
+      Authorization:`Bearer ${token}`,
+    }
+  })
+}
+
+export const updateUserAvatarNickName=(avatar:string,nickName?:string)=>{
+  return req.request('https://api-harmony-teach.itheima.net/hm/userInfo/profile',{
+    method:http.RequestMethod.POST,
+    header:{
+      contentType: 'application/json',
+      Authorization:`Bearer ${token}`,
+    },
+    extraData:{
+      avatar:avatar,
+      nickName:nickName
+    }
+  })
+}
+
+export const studyInfo=()=>{
+  return req.request('https://api-harmony-teach.itheima.net/hm/studyInfo',{
+    method:http.RequestMethod.GET,
+    header:{
+      Authorization:`Bearer ${token}`,
+    }
+  })
+}
+
+export const tracking=()=>{
+  return req.request('https://api-harmony-teach.itheima.net/hm/time/tracking',{
+    method:http.RequestMethod.POST,
+    header:{
+      contentType: 'application/json',
+      Authorization:`Bearer ${token}`,
+    }
+  })
 }

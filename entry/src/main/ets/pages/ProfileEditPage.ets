@@ -1,13 +1,108 @@
 import { promptAction } from '@kit.ArkUI'
-import { authStore, HdUser, HdUserModel } from '../common/utils/Auth'
+import { authStore, HdUser, HdUserModel, InfoUser, ProfileUser } from '../common/utils/Auth'
+import { picker } from '@kit.CoreFileKit'
+import fs from '@ohos.file.fs';
+import { http } from '@kit.NetworkKit';
+import { request } from '@kit.BasicServicesKit';
+import { Logger } from '../common/utils/Logger';
+import { allResponse, getUserInfo, updateUserAvatarNickName } from '../common/utils/myReq';
 
 let user=authStore.getUser()
+
+
 
 @Entry
 @Component
 struct ProfileEditPage {
 
   @State user:HdUser=authStore.getUser()
+
+  onPageShow(): void {
+    console.info('user before')
+    console.info(`user:${JSON.stringify(this.user)}`)
+    console.info('user after')
+  }
+
+  async pickerAvatar() {
+    //  1. 实例化选择参数对象
+    const options = new picker.PhotoSelectOptions()
+    options.MIMEType = picker.PhotoViewMIMETypes.IMAGE_TYPE // 表示从相册中选择图片
+    options.maxSelectNumber = 1 // 表示只选择一张
+
+    //   2. 实例化选择器对象
+    const pickerView = new picker.PhotoViewPicker()
+    //   3. 调用选择器对象上的select方法传入参数对象即可完成选择
+    let res = await pickerView.select(options)
+
+    AlertDialog.show({message:JSON.stringify(res.photoUris)})
+
+    //   4. 判断用户取消了选择图片，则组织下面代码的继续运行
+    if (res.photoUris.length === 0) {
+      promptAction.showToast({ message: "用户取消图片选择" })
+      return
+    }
+    //   4.1 准备好一个图片的完整路径
+    let ext = 'jpg' // 图片扩展名
+    let fileName = Date.now().toString() // 图片名称
+    let cacheDir = getContext().cacheDir // 获取应用程序的缓存目录
+    let fullPath = cacheDir + '/' + fileName + '.' + ext // 完整的图片路径
+    let fullFileName=fileName+'.'+ext
+    //   4.2 利用fs拷贝图片
+    let file = fs.openSync(res.photoUris[0], fs.OpenMode.READ_ONLY)
+    fs.copyFileSync(file.fd,fullPath)
+    AlertDialog.show({ message: '图片拷贝成功' })
+
+    //   5. 利用request.uploadFile方法完成应用程序缓存目录下的文件上传操作
+    //   5.1 缓存文件路径
+    let uploadFilePath = `internal://cache/${fullFileName}`
+
+
+    //   5.2 准备reqeust
+     let uploador = await request.uploadFile(getContext(), {
+      method: 'POST',
+      url: 'https://api-harmony-teach.itheima.net/hm/userInfo/avatar',
+      header: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": `Bearer ${this.user.token}`
+      },
+      // name：指的是接口中的body中的参数名称，不能写错一定要和接口保持一致
+      // uri:指的是应用程序缓存中的图片
+      //filename：文件名称
+      // type：文件类型，也就是扩展名
+      files: [{ name: 'file', uri: uploadFilePath, filename: fullFileName, type: ext }],
+      data: [] // 因为本接口除了上传文件之外，无需接收其他文本数据，所以空着即可
+    })
+
+    //   5.3 注册uploador对象上的两个事件，一个是progress用来监听上传进度，一个是fail用来监听上传失败的异常获取
+    uploador.on('progress', (uploadSize, totalSize) => {
+      //  这个回调函数是随着文件的上传会被不间断的触发执行，每次的uploadSize的值会增加，但是totalSize永远都是当前上传图片的大小
+      //   所以我们可以通过判断 uploadSize === totalSize 表示上传完成，我们就可以做完成后端 逻辑处理
+      Logger.info('上传:',uploadSize + ' / '+ totalSize)
+      if(uploadSize === totalSize){
+        AlertDialog.show({message:'图片上传完成'})
+      }
+      //   由于此函数会被多次调用，所以我们可以在这个函数中计算处当前上传的进度百分比
+    })
+
+    //  监听上传失败的事件
+    uploador.on('fail',(err)=>{
+      AlertDialog.show({message:JSON.stringify(err)})
+    })
+
+    this.RefreshUserData()
+  }
+
+  async RefreshUserData(){
+    await this.getUserInfoToUser();
+  }
+
+  private async getUserInfoToUser() {
+    const result = await getUserInfo();
+    const userInfo = JSON.parse(result.result.toString()) as allResponse<InfoUser>;
+    this.user.avatar = userInfo.data.avatar;
+    this.user.nickName = userInfo.data.nickName;
+    authStore.setUser(this.user)
+  }
 
   build() {
     Navigation() {
@@ -23,7 +118,7 @@ struct ProfileEditPage {
                 .border({ width: 0.5, color: '#e4e4e4' })
                 .onClick(() => {
 
-                  // 选择头像并上传this.pickerAvatar()
+                  this.pickerAvatar()
 
                 })
             }.width('100%').height((60)).justifyContent(FlexAlign.SpaceBetween)
@@ -31,7 +126,7 @@ struct ProfileEditPage {
 
           ListItem() {
             Row() {
-              Text(this.user.username)
+              Text('昵称')
               TextInput({ text:this.user.nickName})
                 .textAlign(TextAlign.End)
                 .layoutWeight(1)
@@ -39,8 +134,18 @@ struct ProfileEditPage {
                 .height((60))
                 .backgroundColor(Color.Transparent)
                 .borderRadius(0)
-                .onSubmit(() => {
-                  // 修改昵称 this.updateNickName()
+                .onChange((val)=>{
+                  this.user.nickName=val
+                })
+                .onSubmit(async () => {
+
+                  const res=await updateUserAvatarNickName(this.user.avatar,this.user.nickName)
+
+                  const result=JSON.parse(res.result.toString()) as ProfileUser
+
+                  console.info(`nickName:${JSON.stringify(result)}`)
+
+                  this.RefreshUserData()
 
                 })
             }.width('100%').height(60).justifyContent(FlexAlign.SpaceBetween)

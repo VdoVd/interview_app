@@ -1,6 +1,23 @@
 import { preferences } from '@kit.ArkData'
 
 
+export interface ProfileUser{
+  success: boolean;
+  code: number;
+  message: string;
+  data: string;
+}
+
+export interface InfoUser {
+  nickName: string;
+  avatar: string;
+  flag: boolean;
+  clockinNumbers: number;
+  clockinTotal: number;
+  id: string;
+  questionNumber: number;
+  totalTime: number;
+}
 export interface HdUser {
   //用户头像地址
   avatar: string;
