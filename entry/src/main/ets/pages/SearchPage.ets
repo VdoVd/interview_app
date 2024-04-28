@@ -8,6 +8,7 @@ struct searchPage{
   @State delete:boolean=false
   @Provide isSearch:boolean=false
   @Provide keyword:string=''
+  @Provide isSearchSuccess:boolean=false
   build() {
     Navigation(){
       Column({space:16}){
@@ -48,14 +49,17 @@ struct searchPage{
             }
           }
           .width('90%')
+          if(this.isSearchSuccess===false||this.searchText!='')
           Flex({wrap:FlexWrap.Wrap}){
             ForEach(this.arr,(item:string,index:number)=>{
-              this.flexTextBuilder(item)
+              Row(){this.flexTextBuilder(item)}.onClick(()=>{
+
+              })
             })
           }
           .width('93%')
         }
-          searchListView()
+          searchListView().layoutWeight(1)
       }
     }.title('刷个面试题')
     .titleMode(NavigationTitleMode.Mini)

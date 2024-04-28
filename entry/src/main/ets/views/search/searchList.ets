@@ -10,6 +10,7 @@ export default struct searchListView{
   @State listItems:homeSubItemModel[]=[]
   @State loadingFlag:boolean=true
   @Consume @Watch("searchReq")  isSearch:boolean
+  @Consume isSearchSuccess:boolean
   searchReq(){
     if(this.isSearch===true) {
       this.loadingFlag = true
@@ -21,7 +22,7 @@ export default struct searchListView{
     let req = http.createHttp()
     const res = await req.request(`https://api-harmony-teach.itheima.net/hm/question/list?questionBankType=10&keyword=vue`)
     let result = (JSON.parse(res.result.toString()) as allResponse<homeSubListModel>).data.rows
-    console.log(`result:${JSON.stringify(result)}`)
+    if(result!=undefined)this.isSearchSuccess=true
     this.listItems = result
     this.isSearch=false
     this.loadingFlag=false
@@ -40,7 +41,7 @@ export default struct searchListView{
         ListItem(){
           Text('加载成功')
         }
-      }.width('100%').padding(20)
+      }.width('100%').padding(20).layoutWeight(1)
       else{
         Row(){
           Text('加载中。。。')
