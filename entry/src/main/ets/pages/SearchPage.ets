@@ -21,7 +21,9 @@ struct searchPage{
               })
               .layoutWeight(1)
             if(this.searchText!='')
-              Text('取消').fontColor(Color.Gray).onClick(()=>{this.searchText=''})
+              Text('取消')
+                .fontColor(Color.Gray)
+                .onClick(()=>{this.searchText=''})
           }
           Row(){
             Text('搜索记录').layoutWeight(1).fontWeight(FontWeight.Bold).textAlign(TextAlign.Start).width('93%')
@@ -43,15 +45,17 @@ struct searchPage{
                 })
               }
             }
-          }.width('90%')
+          }
+          .width('90%')
           Flex({wrap:FlexWrap.Wrap}){
             ForEach(this.arr,(item:string,index:number)=>{
               this.flexTextBuilder(item)
             })
-          }.width('93%')
+          }
+          .width('93%')
         }
 
-        searchListView({keyword:this.searchText})
+        // searchListView({keyword:this.searchText})
 
       }
     }.title('刷个面试题')
