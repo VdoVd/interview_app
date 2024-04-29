@@ -215,4 +215,4 @@ export struct WordPage {
     .titleMode(NavigationTitleMode.Mini)
     .padding({ top: this.topHeight })
   }
-}add
+}

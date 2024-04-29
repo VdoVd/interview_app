@@ -34,7 +34,7 @@ struct LoginPage {
 
   onPageShow(): void {
       this.isAgree=true
-      this.login()
+      // this.login()
       this.loading = true
       setTimeout(()=>{
         this.loading = false
@@ -145,7 +145,7 @@ struct LoginPage {
           .stateEffect(false)
           .onClick(() => {
             // TODO:编写登录逻辑
-            this.login()
+            // this.login()
             this.loading = true
             setTimeout(()=>{
               this.loading = false
