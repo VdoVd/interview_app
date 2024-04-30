@@ -6,8 +6,11 @@ import { HomeCategoryComp } from './HomeCategoryComp'
 import { router, window } from '@kit.ArkUI'
 import { allResponse, getClockIn } from '../../common/utils/myReq'
 import { clockIn } from '../../models/clockInModel'
+import { untilWinManagerClass } from '../../common/utils/manager'
 
 AppStorage.setOrCreate<string>("questionId","")
+
+let manage:untilWinManagerClass=new untilWinManagerClass()
 
 @Component
 export struct Home {
@@ -31,15 +34,11 @@ export struct Home {
 
     this.clickCount=result.data.clockinNumbers
 
-    window.getLastWindow(getContext()).then(win => {
-      let area = win.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM)
-      win.setWindowLayoutFullScreen(true)  // true：设置全屏
-      win.setWindowSystemBarProperties({statusBarContentColor:'#FFFFFF'}) // 白色
+    manage.fullScreen()
 
-      let h = area.topRect.height  // 获取安全区域高度，单位px
-      let hvp = px2vp(h)  // 将px单位转换成vp单位
-      AppStorage.setOrCreate('topHeight',hvp)  // 将高度保存到AppStorage中共享给其他页面使用
-    })
+    manage.setWindowBarFontColor()
+
+    manage.setWindowBarHeight()
 
   }
 
