@@ -1,10 +1,13 @@
 import { HdClockIn } from '../../common/components/HdClockIn'
+import { window } from '@kit.ArkUI'
+
 interface content{
   imgPath:Resource
   text:string
 }
 @Component
 export struct Mine {
+  @StorageProp('topHeight') topHeight: number = 0
 
   @State middleList:content[]=[
     {imgPath:$r('app.media.ic_mine_history'),text:'历史记录'},
@@ -14,7 +17,24 @@ export struct Mine {
   ]
 
   aboutToAppear(): void {
+    window.getLastWindow(getContext()).then(win => {
+      let area = win.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM)
+      win.setWindowLayoutFullScreen(true)  // true：设置全屏
+      win.setWindowSystemBarProperties({statusBarContentColor:'#FFFFFF'}) // 白色
 
+      let h = area.topRect.height  // 获取安全区域高度，单位px
+      let hvp = px2vp(h)  // 将px单位转换成vp单位
+      AppStorage.setOrCreate('topHeight',hvp)  // 将高度保存到AppStorage中共享给其他页面使用
+    })
+  }
+
+  aboutToDisappear(): void {
+    window.getLastWindow(getContext()).then(win => {
+
+      win.setWindowSystemBarProperties({statusBarContentColor:'#FFFFFF'}) // 白色
+
+      AppStorage.setOrCreate('topHeight',0)
+    })
   }
 
   build() {
@@ -72,7 +92,7 @@ export struct Mine {
     }
     .width('100%')
     .height('100%')
-    .padding(20)
+    .padding(this.topHeight)
     .backgroundColor('rgba(0,0,0,0.1)')
   }
 }

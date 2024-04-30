@@ -33,6 +33,15 @@ struct Index {
     })
   }
 
+  aboutToDisappear(): void {
+    window.getLastWindow(getContext()).then(win => {
+
+      win.setWindowSystemBarProperties({statusBarContentColor:'#FFFFFF'}) // 白色
+
+      AppStorage.setOrCreate('topHeight',0)
+    })
+  }
+
   build() {
     Row() {
       Tabs({barPosition:BarPosition.End}) {
@@ -69,6 +78,7 @@ struct Index {
       })
     }
     .height('100%')
+    .padding({bottom:15})
   }
 }
 
