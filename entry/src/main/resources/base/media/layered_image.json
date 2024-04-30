@@ -1,7 +1,7 @@
 {
   "layered-image":
   {
-    "background" : "$media:background",
-    "foreground" : "$media:foreground"
+    "background" : "$media:ic_interview_logo",
+    "foreground" : "$media:ic_interview_logo"
   }
 }

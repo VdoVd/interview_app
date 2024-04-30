@@ -11,6 +11,7 @@ AppStorage.setOrCreate<string>("questionId","")
 
 @Component
 export struct Home {
+  @StorageProp('topHeight') topHeight: number = 0
 
   @State clickCount:number=0
 
@@ -128,7 +129,7 @@ export struct Home {
 
     }
     .width('100%')
-    .padding(15)
+    .padding({top:this.topHeight})
     .height('100%')
   }
 }

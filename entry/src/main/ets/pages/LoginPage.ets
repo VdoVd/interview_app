@@ -4,6 +4,7 @@ import { BasicConstant } from '../common/constants/BasicContant';
 import { authStore, HdUserModel } from '../common/utils/Auth';
 import { hdHttp } from '../common/utils/request';
 import { HdResponse } from '../models/HttpResponseModel';
+import { window } from '@kit.ArkUI';
 
 interface iLoginParams{
   username:string
@@ -22,6 +23,7 @@ struct LoginPage {
   @State
   loading: boolean = false
 
+
   @Styles
   inputStyle() {
     .margin({ bottom: (15) })
@@ -34,7 +36,7 @@ struct LoginPage {
 
   onPageShow(): void {
       this.isAgree=true
-      // this.login()
+      this.login()
       this.loading = true
       setTimeout(()=>{
         this.loading = false

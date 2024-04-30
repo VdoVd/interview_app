@@ -1,5 +1,7 @@
 @Component
 export struct Project {
+  @StorageProp('topHeight') topHeight: number = 0
+
   build() {
     Column(){
 
@@ -14,11 +16,14 @@ export struct Project {
           .layoutWeight(1)
       }.title('项目')
       .titleMode(NavigationTitleMode.Mini)
+      .backgroundColor(Color.Blue)
 
 
 
     }
     .width('100%')
     .height('100%')
+    .padding({top:this.topHeight})
+
   }
 }

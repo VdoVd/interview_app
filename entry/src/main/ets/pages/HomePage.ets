@@ -6,6 +6,7 @@ import { HomeCategoryComp } from '../views/home/HomeCategoryComp'
 @Entry
 @Component
 struct HomePage{
+
   build() {
     Scroll(){
       Column(){
