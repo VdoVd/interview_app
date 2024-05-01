@@ -1,12 +1,18 @@
 import { promptAction } from '@kit.ArkUI'
 import util from '@ohos.util'
+import { webview } from '@kit.ArkWeb'
 
 export interface WordItem {
   zh: string
   en: string
   code: string
 }
-
+export interface Words {
+  en: string;
+  zh: string;
+  down: number;
+  code: string;
+}
 @Entry
 @Component
 export struct WordPage {
@@ -19,6 +25,14 @@ export struct WordPage {
   activeIndex: number = 0 // 当前阶段索引
   @State
   loading: boolean = false
+
+  onPageShow(): void {
+    const resourceMgr = getContext().resourceManager
+    let uint8Array = resourceMgr.getRawFileContentSync('word.json')
+    const textDecoder = new util.TextDecoder()
+    const workJsonstr = textDecoder.decodeWithStream(uint8Array)
+    this.words = JSON.parse(workJsonstr) as Record<string, WordItem[]>
+  }
   // word
   @State
   words: Record<string, WordItem[]> = {
@@ -42,6 +56,8 @@ export struct WordPage {
       }
     ]
   }
+  webviewCtrl:webview.WebviewController=new webview.WebviewController()
+  @State
   currentCode: string = ''
   currentWordEn: string = ''
   currentWordZh: string = ''
@@ -93,10 +109,17 @@ export struct WordPage {
   // 弹出单词用法弹窗
   @Builder
   codeSheetBuilder() {
-    Stack() {
-      Text("使用WebView动态高亮显示单词用法")
-    }
-    .padding({ left: 16, right: 16, top: 8, bottom: 34 })
+    Row(){
+      Web({
+        src:$rawfile('word.html'),
+        controller:this.webviewCtrl
+      })
+        .onPageEnd(()=>{
+          this.webviewCtrl.runJavaScript(`writeCode(\`${this.currentCode}\`)`)
+        })
+    }.height('100%')
+    .width('100%')
+    .padding({left:16,right:16,top:18,bottom:34})
   }
 
   build() {
@@ -214,5 +237,8 @@ export struct WordPage {
     .title('常用单词')
     .titleMode(NavigationTitleMode.Mini)
     .padding({ top: this.topHeight })
+    .onAppear(()=>{
+      console.log(`top:${this.topHeight}`)
+    })
   }
 }

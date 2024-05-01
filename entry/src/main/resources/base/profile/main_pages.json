@@ -9,6 +9,7 @@
     "pages/questionDetailPage",
     "pages/clockPage",
     "pages/ProfileEditPage",
-    "pages/studyTimePage"
+    "pages/studyTimePage",
+    "pages/wordPage"
   ]
 }

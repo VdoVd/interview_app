@@ -21,7 +21,7 @@ struct Index {
     }
   }
 
-  aboutToAppear(): void {
+  onPageShow(): void {
     window.getLastWindow(getContext()).then(win => {
       let area = win.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM)
       win.setWindowLayoutFullScreen(true)  // true：设置全屏
@@ -29,6 +29,7 @@ struct Index {
 
       let h = area.topRect.height  // 获取安全区域高度，单位px
       let hvp = px2vp(h)  // 将px单位转换成vp单位
+      console.log(`hvp:${hvp}`)
       AppStorage.setOrCreate('topHeight',hvp)  // 将高度保存到AppStorage中共享给其他页面使用
     })
   }

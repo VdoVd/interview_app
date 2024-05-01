@@ -24,6 +24,8 @@ export default struct MineContentView {
 
   @State clockCount?: number = this.user.clockinNumbers
 
+
+
   @Builder
   navBuilder(nav: Nav) {
     GridCol() {
@@ -77,6 +79,13 @@ export default struct MineContentView {
     .height(50)
     .width('100%')
     .padding({ left: 16, right: 10 })
+    .onClick(()=>{
+      if(tool.name==='前端常用词'){
+        router.pushUrl({
+          url:"pages/wordPage"
+        })
+      }
+    })
   }
 
   build() {
