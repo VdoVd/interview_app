@@ -1,6 +1,7 @@
-import { promptAction } from '@kit.ArkUI'
+import { promptAction, window } from '@kit.ArkUI'
 import util from '@ohos.util'
 import { webview } from '@kit.ArkWeb'
+import { WordSoundDialog } from '../views/word/WordSoundDialog'
 
 export interface WordItem {
   zh: string
@@ -13,9 +14,22 @@ export interface Words {
   down: number;
   code: string;
 }
+@CustomDialog
+struct CustomDialogExample {
+  controller: CustomDialogController
+  build() {
+    Column() {
+      Text('我是内容')
+        .fontSize(20)
+        .margin({ top: 10, bottom: 10 })
+    }
+  }
+}
+
 @Entry
 @Component
 export struct WordPage {
+
   @StorageProp('topHeight') topHeight: number = 0
   @State
   showTypeSheet: boolean = false // 控制当前阶段分类弹框
@@ -32,6 +46,16 @@ export struct WordPage {
     const textDecoder = new util.TextDecoder()
     const workJsonstr = textDecoder.decodeWithStream(uint8Array)
     this.words = JSON.parse(workJsonstr) as Record<string, WordItem[]>
+    window.getLastWindow(getContext()).then(win => {
+      let area = win.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM)
+      win.setWindowLayoutFullScreen(true)  // true：设置全屏
+      win.setWindowSystemBarProperties({statusBarContentColor:'#FFFFFF'}) // 白色
+
+      let h = area.topRect.height  // 获取安全区域高度，单位px
+      let hvp = px2vp(h)  // 将px单位转换成vp单位
+      console.log(`hvp:${hvp}`)
+      AppStorage.setOrCreate('topHeight',hvp)  // 将高度保存到AppStorage中共享给其他页面使用
+    })
   }
   // word
   @State
@@ -59,7 +83,9 @@ export struct WordPage {
   webviewCtrl:webview.WebviewController=new webview.WebviewController()
   @State
   currentCode: string = ''
+  @State
   currentWordEn: string = ''
+  @State
   currentWordZh: string = ''
   scroller = new Scroller()
 
@@ -85,6 +111,7 @@ export struct WordPage {
   @Builder
   typeSheetBuilder() {
     Column() {
+
       Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
         ForEach(Object.keys(this.words), (key: string, index) => {
           Button() {
@@ -121,7 +148,9 @@ export struct WordPage {
     .width('100%')
     .padding({left:16,right:16,top:18,bottom:34})
   }
-
+  dialogController: CustomDialogController = new CustomDialogController({
+    builder:WordSoundDialog({wordEn:this.currentWordEn,wordZh:this.currentWordEn})
+  })
   build() {
     Navigation() {
       Column() {
@@ -172,6 +201,8 @@ export struct WordPage {
                     // 开启弹框读单词
                     this.currentWordEn = wordItem.en
                     this.currentWordZh = wordItem.zh
+                    this.dialogController.open()
+
                   })
                 Column({ space: 10 }) {
                   Text(wordItem.en)
@@ -189,9 +220,7 @@ export struct WordPage {
                     Text('读音评测')
                       .fontSize(12)
                       .fontColor($r('app.color.common_gray_01'))
-                    // Image($r('app.media.ic_public_audio'))
-                    //   .width(16)
-                    //   .aspectRatio(1)
+
                   }
                   .onClick(() => {
 
