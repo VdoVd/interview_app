@@ -8,8 +8,8 @@ import { window } from '@kit.ArkUI'
 @CustomDialog
 export struct WordSoundDialog {
   controller: CustomDialogController
-  wordEn: string = ''
-  wordZh: string = ''
+  @Link wordEn: string
+  @Link wordZh: string
   @State
   isGreen: boolean = false
   timer: number = -1
@@ -18,7 +18,9 @@ export struct WordSoundDialog {
   avplayer: media.AVPlayer = Object()
 
   aboutToAppear() {
-    this.playMp3('http://dict.youdao.com/dictvoice?audio=' + this.wordEn + '&type=1 ')
+    console.log(`en:${this.wordEn}`)
+    console.log(`zn:${this.wordZh}`)
+    this.playMp3('http://dict.youdao.com/dictvoice?audio=' + this.wordEn + '&type=1')
     window.getLastWindow(getContext()).then(win => {
       let area = win.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM)
       win.setWindowLayoutFullScreen(true)  // true：设置全屏
@@ -44,6 +46,7 @@ export struct WordSoundDialog {
     avPlayer.on("stateChange", (state) => {
       if (state === "initialized") {
         //   表示avPlayer已经设置了播放源
+        console.log('init')
         avPlayer.prepare()
       }
 
@@ -51,12 +54,14 @@ export struct WordSoundDialog {
         //  表示avPlayer已经进入了准备播放状态，此时就可以通知播放了
         // 设置avPlayer循环播放音频
         avPlayer.loop = true
+        console.log('play')
         avPlayer.play()
       }
     })
-
+    console.log('set play')
     //   3. 设置播放源
     avPlayer.url = url
+    console.log('after set play')
   }
 
 
