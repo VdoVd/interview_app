@@ -36,6 +36,7 @@ export struct WordSoundDialog {
   aboutToDisappear(): void {
     //   4. 停止播放
     this.avplayer.stop()
+
   }
 
   async playMp3(url: string) {
