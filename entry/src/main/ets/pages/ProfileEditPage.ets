@@ -137,6 +137,7 @@ struct ProfileEditPage {
                 .onChange((val)=>{
                   this.user.nickName=val
                 })
+
                 .onSubmit(async () => {
 
                   const res=await updateUserAvatarNickName(this.user.avatar,this.user.nickName)
