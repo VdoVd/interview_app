@@ -134,17 +134,6 @@ export struct Home {
       HomeCategoryComp()
         .layoutWeight(1)
 
-      // QuestionItemComp({item:{
-      //   id: '1',
-      //   stem: '请总结一下Vue2中生命周期函数有哪些',
-      //   difficulty: 3,
-      //   likeCount: 10,
-      //   views: 20,
-      //   readFlag: 1
-      // } as QuestionItem})
-      //   .padding(10)
-
-
     }
     .width('100%')
     .padding({top:this.topHeight})

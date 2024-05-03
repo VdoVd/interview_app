@@ -1,7 +1,6 @@
 import { QuestionType, QuestionTypeModel } from '../../models/CategoryModel'
 import { hdHttp } from '../../common/utils/request'
-import {
-  allResponse,getHomeSubList, getHomeTypeList, hasCLockIn as hasClockIn, login } from '../../common/utils/myReq'
+import {allResponse,getHomeSubList, getHomeTypeList, hasCLockIn as hasClockIn, login } from '../../common/utils/myReq'
 import { homeSubItemModel, homeSubListModel } from '../../models/homeSubListModel'
 import HomeSubListItemView from './HomeSubListItemView'
 import { promptAction, router } from '@kit.ArkUI'
@@ -75,9 +74,6 @@ export  struct HomeCategoryComp {
   }
 
   async changeSubList(){
-
-    if(this.showSheet===false)
-    this.refreshing=true
 
     const res=await getHomeSubList(10,this.typeId,this.page,this.sort)
 
@@ -161,22 +157,32 @@ export  struct HomeCategoryComp {
 
                   })
 
-                }.width('100%')
+                }
+                .nestedScroll({
+                  scrollForward:NestedScrollMode.PARENT_FIRST,
+                  scrollBackward:NestedScrollMode.SELF_FIRST
+                })
+                .width('100%')
                 .height('100%')
                 .scrollBar(BarState.Off)
                 .onReachEnd(()=>{
                   this.page++
                   clearTimeout(this.timeId)
                   promptAction.showToast({message:'正在加载中'})
-                  setTimeout(()=>{
+                  this.timeId=setTimeout(()=>{
                     this.changeSubList()
-                  },500)
+                  },1000)
                 })
 
               }
               .onRefreshing(()=>{
                 promptAction.showToast({message:'正在加载中'})
-                this.changeSubList()
+                this.page++
+                clearTimeout(this.timeId)
+                this.timeId=setTimeout(()=>{
+                  this.changeSubList()
+                },300)
+
               })
 
             }
