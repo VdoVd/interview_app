@@ -10,6 +10,7 @@
     "pages/clockPage",
     "pages/ProfileEditPage",
     "pages/studyTimePage",
-    "pages/wordPage"
+    "pages/wordPage",
+    "pages/ProjectDetailComp"
   ]
 }

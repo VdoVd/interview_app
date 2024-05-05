@@ -202,3 +202,15 @@ export const tracking=()=>{
     }
   })
 }
+
+export const getQuestionType=()=>{
+  return req.request('https://api-harmony-teach.itheima.net/hm/question/type?type=items')
+}
+
+export const getQuestionList=(id:number,sort?:number)=>{
+  if(sort===undefined)
+    return req.request(`https://api-harmony-teach.itheima.net/hm/question/list?id=${id}&questionBankType=10`)
+  else
+    return req.request(`https://api-harmony-teach.itheima.net/hm/question/list?id=${id}&questionBankType=10&sort=${sort}`)
+
+}

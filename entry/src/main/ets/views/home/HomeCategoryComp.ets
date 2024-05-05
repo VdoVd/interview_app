@@ -170,6 +170,7 @@ export  struct HomeCategoryComp {
                   clearTimeout(this.timeId)
                   promptAction.showToast({message:'正在加载中'})
                   this.timeId=setTimeout(()=>{
+                    console.log('reachEnd.............................................................')
                     this.changeSubList()
                   },1000)
                 })

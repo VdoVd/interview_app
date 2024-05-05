@@ -39,7 +39,6 @@ struct Index {
 
       win.setWindowSystemBarProperties({statusBarContentColor:'#FFFFFF'}) // 白色
 
-      AppStorage.setOrCreate('topHeight',0)
     })
   }
 
