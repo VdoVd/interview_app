@@ -2,6 +2,7 @@ import { homeSubItemModel, homeSubListModel } from '../../models/homeSubListMode
 import { http } from '@kit.NetworkKit'
 import HomeSubListItemView from '../home/HomeSubListItemView'
 import { allResponse } from '../../common/utils/myReq'
+import { IvSkeleton } from '../../common/components/IvSkeleton'
 
 @Component
 export default struct searchListView{
@@ -10,7 +11,19 @@ export default struct searchListView{
   @State listItems:homeSubItemModel[]=[]
   @State loadingFlag:boolean=true
   @Consume @Watch("searchReq")  isSearch:boolean
-  @Consume isSearchSuccess:boolean
+  @Consume @Watch("searchReq") isSearchSuccess:boolean
+  @Consume isFinishLoad:boolean
+  @Builder
+  skeletonBuilder(){
+    Column(){
+      ForEach(Array.from({length:15}),(item:undefined)=>{
+        Row({space:15}){
+          IvSkeleton({widthValue:'30%',heightValue:20})
+          IvSkeleton({widthValue:'60%',heightValue:20})
+        }.padding(10)
+      })
+    }
+  }
   searchReq(){
     if(this.isSearch===true) {
       this.loadingFlag = true
@@ -27,26 +40,27 @@ export default struct searchListView{
     this.isSearch=false
     this.loadingFlag=false
     this.keyword=''
+    this.isFinishLoad=true
     console.log('end loading...')
   }
   build() {
     Column(){
-      if(this.loadingFlag===false)
+
+
       List(){
+        if(this.isSearchSuccess=true)
         ForEach(this.listItems,(item:homeSubItemModel,index:number)=>{
           ListItem(){
             HomeSubListItemView({item:item})
           }
         })
+        else
         ListItem(){
-          Text('加载成功')
+          Text('load...')
+          this.skeletonBuilder()
         }
       }.width('100%').padding(20).layoutWeight(1)
-      else{
-        Row(){
-          Text('加载中。。。')
-        }
-      }
+
     }
   }
 }
