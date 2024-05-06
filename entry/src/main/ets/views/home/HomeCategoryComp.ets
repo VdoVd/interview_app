@@ -5,6 +5,7 @@ import { homeSubItemModel, homeSubListModel } from '../../models/homeSubListMode
 import HomeSubListItemView from './HomeSubListItemView'
 import { promptAction, router } from '@kit.ArkUI'
 import HomeFilterView from './HomeFilterView'
+import { IvSkeleton } from '../../common/components/IvSkeleton'
 
 AppStorage.setOrCreate<homeSubItemModel[]>("subList",[])
 
@@ -35,9 +36,12 @@ export  struct HomeCategoryComp {
 
   @State refreshing:boolean=false
 
+  @State isLoading:boolean=false
+
    tryIt(){
 
-    console.log('ques before')
+    console.log('ques before type')
+
 
     hdHttp.get<QuestionTypeModel[]>('question/type').then((res) => {
 
@@ -74,18 +78,58 @@ export  struct HomeCategoryComp {
   }
 
   async changeSubList(){
+    console.log('change sub Index')
+    this.isLoading=true
 
     const res=await getHomeSubList(10,this.typeId,this.page,this.sort)
 
     let receiveList=JSON.parse(res.result.toString()) as allResponse<homeSubListModel>
-
-    this.list=receiveList.data.rows
+    this.list.unshift(...receiveList.data.rows)
+    this.list=[...this.list]
 
     if(this.refreshing=true)this.refreshing=false
 
+    this.isLoading=false
+
+
   }
 
-  timeId?:number
+  timeId?:number=0
+
+  @Builder
+  SkeletonBuilder() {
+    Column({space:10}) {
+
+
+      List({ space: (15) }){
+        ForEach([1, 2 ], () => {
+          ListItem(){
+            Column({ space: (15) }){
+
+              Row({ space: (15) }){
+                IvSkeleton({ widthValue: (30) })
+                IvSkeleton({ widthValue: '100%' }).layoutWeight(1)
+              }
+
+              Row({ space: (15) }){
+                IvSkeleton({ widthValue: (50) })
+                IvSkeleton({ widthValue: (50) })
+                IvSkeleton({ widthValue: (50) })
+              }
+              .width('100%')
+            }
+            .padding({ top: (10), bottom: (10) })
+          }
+        })
+      }
+      .divider({ strokeWidth: 0.5, color: $r('app.color.common_gray_bg') })
+      .scrollBar(BarState.Off)
+    }
+    .width('100%')
+    .padding((15))
+    .layoutWeight(1)
+
+  }
 
   @Builder
   TabItemBuilder(q: QuestionTypeModel, index: number) {
@@ -116,124 +160,119 @@ export  struct HomeCategoryComp {
   }
 
   build() {
-    Stack({ alignContent: Alignment.TopEnd }) { //设置堆叠位置为右上角
-      Tabs({ index: $$this.index }) {
-        ForEach(this.questionTypeList , (item: QuestionTypeModel, index: number) => {
+    Column(){
 
-          TabContent() {
-            Column(){
-              if(this.isShowWait)
-              Row({space:5}) {
+      Stack({ alignContent: Alignment.TopEnd }) { //设置堆叠位置为右上角
+        Tabs({ index: $$this.index }) {
+          ForEach(this.questionTypeList , (item: QuestionTypeModel, index: number) => {
 
-                LoadingProgress()
-                  .width(20)
+            TabContent() {
+              Column(){
+                if(this.isLoading===true)
+                  this.SkeletonBuilder()
+                else {
 
-                Text('加载中...')
-                  .fontSize(20)
+                  Refresh({refreshing:$$this.refreshing}){
 
-              }.width('100%')
-              .justifyContent(FlexAlign.Center)
+                    List(){
 
-              Refresh({refreshing:$$this.refreshing}){
+                      ForEach(this.list,(item:homeSubItemModel,index:number)=>{
 
-                List(){
+                        ListItem(){
 
-                  ForEach(this.list,(item:homeSubItemModel,index:number)=>{
+                          HomeSubListItemView({item:item})
+                            .margin({bottom:15})
+                            .onClick(()=>{
+                              router.pushUrl({
+                                url:"pages/questionDetailPage",
+                                params:{
+                                  id:item.id
+                                }
+                              })
+                            })
 
-                    ListItem(){
+                        }
 
-                      HomeSubListItemView({item:item})
-                        .margin({bottom:15})
-                        .onClick(()=>{
-                          router.pushUrl({
-                            url:"pages/questionDetailPage",
-                            params:{
-                              id:item.id
-                            }
-                          })
-                        })
+                      })
 
                     }
+                    .width('100%')
+                    .height('100%')
+                    .scrollBar(BarState.Off)
+                    .onReachEnd(()=>{
+                      clearTimeout(this.timeId)
+                      promptAction.showToast({message:'正在加载中'})
+                      this.timeId=setTimeout(()=>{
+                        this.page++
+                        console.log('reachEnd.............................................................'+`page:${this.page}`)
+                        this.changeSubList()
+                      },2000)
+                    })
+
+                  }
+                  .onRefreshing(()=>{
+                    promptAction.showToast({message:'正在加载中'})
+                    clearTimeout(this.timeId)
+                    this.timeId=setTimeout(()=>{
+                      this.page++
+                      this.changeSubList()
+                    },300)
 
                   })
-
                 }
-                .nestedScroll({
-                  scrollForward:NestedScrollMode.PARENT_FIRST,
-                  scrollBackward:NestedScrollMode.SELF_FIRST
-                })
-                .width('100%')
-                .height('100%')
-                .scrollBar(BarState.Off)
-                .onReachEnd(()=>{
-                  this.page++
-                  clearTimeout(this.timeId)
-                  promptAction.showToast({message:'正在加载中'})
-                  this.timeId=setTimeout(()=>{
-                    console.log('reachEnd.............................................................')
-                    this.changeSubList()
-                  },1000)
-                })
+
 
               }
-              .onRefreshing(()=>{
-                promptAction.showToast({message:'正在加载中'})
-                this.page++
-                clearTimeout(this.timeId)
-                this.timeId=setTimeout(()=>{
-                  this.changeSubList()
-                },300)
 
-              })
-
-            }
-
-          }.tabBar( this.TabItemBuilder (item, index))
-          .height('100%')
-        })
-      }
-      .divider({ strokeWidth: $r('app.float.common_border_width'),
-        color: $r('app.color.common_gray_border') }) //设置tabbar下面的横线样式
-      .barMode(BarMode.Scrollable) // 设置tabs可以滚动
-      .barHeight(44)
-      .onChange(
-
-        i =>{
-          this.typeId=this.questionTypeList[i].id
-          this.index = i
-          this.page=1
+            }.tabBar( this.TabItemBuilder (item, index))
+            .height('100%')
+          })
         }
+        .divider({ strokeWidth: $r('app.float.common_border_width'),
+          color: $r('app.color.common_gray_border') }) //设置tabbar下面的横线样式
+        .barMode(BarMode.Scrollable) // 设置tabs可以滚动
+        .barHeight(44)
+        .onChange(
 
-      )  // 切换tabbar内容
+          i =>{
+            console.log(`change tabs:${i}`)
+            this.typeId=this.questionTypeList[i].id
+            this.index = i
+            this.page=1
+            this.list=[...[]]
+          }
 
-      Row() {
-        // 过滤条件按钮
-        Image($r('app.media.ic_home_filter'))
-          .width(22)
-          .height(44)
-          .objectFit(ImageFit.Contain)  // 设置图片按照容器大小填满
+        )  // 切换tabbar内容
+
+        Row() {
+          // 过滤条件按钮
+          Image($r('app.media.ic_home_filter'))
+            .width(22)
+            .height(44)
+            .objectFit(ImageFit.Contain)  // 设置图片按照容器大小填满
+        }
+        .width(54)
+        .height(44)
+        .justifyContent(FlexAlign.Center) // 图片居中对齐
+        .backgroundColor(Color.White)// 设置背景色位白色，使过滤条件图标能遮盖住tabbar的文字
+        .onAppear(()=>{
+
+          this.tryIt()
+
+        })
+        .onClick(()=>{
+
+          this.showSheet=true
+
+          console.log('onClick it')
+
+        })
+
       }
-      .width(54)
-      .height(44)
-      .justifyContent(FlexAlign.Center) // 图片居中对齐
-      .backgroundColor(Color.White)// 设置背景色位白色，使过滤条件图标能遮盖住tabbar的文字
-      .onAppear(()=>{
-
-        this.changeSubList()
-
-        this.tryIt()
-
-      })
-      .onClick(()=>{
-
-        this.showSheet=true
-
-        console.log('onClick it')
-
-      })
+      .bindSheet(this.showSheet,this.sheetBuilder(),{height:750,showClose:false})
 
     }
-    .bindSheet(this.showSheet,this.sheetBuilder(),{height:750,showClose:false})
+
 
   }
 }

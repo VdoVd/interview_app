@@ -90,6 +90,7 @@ export const getHomeTypeList=()=>{
     }
     // console.log(`sub list:${JSON.stringify(result)}`)
     console.info('end type')
+
   })
 
 }

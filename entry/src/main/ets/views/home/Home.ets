@@ -128,9 +128,6 @@ export struct Home {
           .selectedItemWidth(BasicConstant.SPACE_MD))
       }
 
-      if(this.isShowWait)
-      this.SkeletonBuilder()
-
       HomeCategoryComp()
         .layoutWeight(1)
 
