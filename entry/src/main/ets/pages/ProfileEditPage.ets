@@ -1,4 +1,4 @@
-import { promptAction } from '@kit.ArkUI'
+import { promptAction, window } from '@kit.ArkUI'
 import { authStore, HdUser, HdUserModel, InfoUser, ProfileUser } from '../common/utils/Auth'
 import { picker } from '@kit.CoreFileKit'
 import fs from '@ohos.file.fs';
@@ -21,8 +21,19 @@ struct ProfileEditPage {
     console.info('user before')
     console.info(`user:${JSON.stringify(this.user)}`)
     console.info('user after')
+    window.getLastWindow(getContext()).then(win => {
+      let area = win.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM)
+      win.setWindowLayoutFullScreen(true)  // true：设置全屏
+      win.setWindowSystemBarProperties({statusBarContentColor:'#FFFFFF'}) // 白色
+
+      let h = area.topRect.height  // 获取安全区域高度，单位px
+      let hvp = px2vp(h)  // 将px单位转换成vp单位
+      console.log(`hvp:${hvp}`)
+      AppStorage.setOrCreate('topHeight',hvp)  // 将高度保存到AppStorage中共享给其他页面使用
+    })
   }
 
+  @StorageLink('topHeight') topHeight:number=0
   async pickerAvatar() {
     //  1. 实例化选择参数对象
     const options = new picker.PhotoSelectOptions()
@@ -166,5 +177,7 @@ struct ProfileEditPage {
     .linearGradient({
       colors: [['#FFB071', 0], ['#f3f4f5', 0.3], ['#f3f4f5', 1]]
     })
+    .padding({top:this.topHeight})
+
   }
 }
