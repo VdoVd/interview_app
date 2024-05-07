@@ -1,12 +1,13 @@
 import { IvSkeleton } from '../common/components/IvSkeleton'
 import searchListView from '../views/search/searchList'
+import { preferences } from '@kit.ArkData'
 
 PersistentStorage.persistProp<string[]>('searchRecord',[])
 
 @Entry
 @Component
 struct searchPage{
-  @StorageLink('searchRecord') arr:string[]=[]
+  @State arr:string[]=[]
   @State searchText:string=''
   @State delete:boolean=false
   @Provide isSearch:boolean=false
@@ -14,13 +15,51 @@ struct searchPage{
   @Provide isSearchSuccess:boolean=false
   @StorageLink('topHeight') topHeight:number=0
   @Provide isFinishLoad:boolean=false
+
+  async saveData(text:string){
+    const pre = preferences.getPreferencesSync(getContext(),{name:'store'})
+    let kwList = pre.getSync('keyword',[]) as string[]
+    kwList.push(text)
+    pre.putSync('keyword',kwList)
+    await pre.flush()
+  }
+
+  async getData(){
+
+    const pre = preferences.getPreferencesSync(getContext(),{name:'store'})
+
+    this.arr=[...(pre.getSync('keyword',[]) as string[])]
+
+  }
+
+  async delData(text?:string){
+    const pre = preferences.getPreferencesSync(getContext(),{name:'store'})
+    let list = pre.getSync('keyword',[]) as string[]
+    if(text){
+      list.splice(list.findIndex(item=>item===text),1)
+      pre.putSync('keyword',list)
+    }else{
+      pre.deleteSync('keyword')
+    }
+    await pre.flush()
+  }
+  async delAll(){
+    const pre = await preferences.getPreferences(getContext(), { name: 'store' })
+    pre.deleteSync("keyword")
+    await pre.flush()
+    await this.getData()
+  }
+  onPageShow(): void {
+    this.getData()
+  }
   @Builder
   skeletonBuilder(){
       Column(){
         ForEach(Array.from({length:10}),(item:undefined)=>{
           Row(){
             IvSkeleton({widthValue:30,heightValue:40})
-            IvSkeleton({widthValue:70,heightValue:40})
+            IvSkeleton({widthValue
+            :70,heightValue:40})
           }
         })
       }
@@ -37,7 +76,8 @@ struct searchPage{
                   this.isSearchSuccess=false
                 })
                 .onSubmit(()=>{
-                  this.arr.push(this.searchText)
+                  this.saveData(this.searchText)
+                  this.getData()
                   this.keyword=this.searchText
                   this.searchText=''
                   this.isSearch=true
@@ -61,8 +101,7 @@ struct searchPage{
                 else{
                   Row({space:10}){
                     Text('全部删除').fontColor(Color.Gray).fontSize(13).onClick(()=>{
-                      this.arr=[...[]]
-                      this.delete=false
+                      this.delData()
                     })
                     Text('|').fontSize(13).fontColor(Color.Gray)
                     Text('完成').fontColor(Color.Gray).fontSize(13).onClick(()=>{
@@ -86,10 +125,27 @@ struct searchPage{
                     Text('换一换').fontColor(Color.Gray).fontSize(12)
                   }.width('100%').justifyContent(FlexAlign.SpaceBetween)
                   Flex({wrap:FlexWrap.Wrap}){
-                    Text('这里是按照搜索热排').width('50%').fontColor(Color.Gray).margin({top:10})
-                    Text('限制长度是330px').width('50%').fontColor(Color.Gray).margin({top:10})
-                    Text('这里是按照搜索热排').width('50%').fontColor(Color.Gray).margin({top:10})
-                    Text('限制长度是330px').width('50%').fontColor(Color.Gray).margin({top:10})
+
+                    Text('这里是按照搜索热排')
+                      .width('50%')
+                      .fontColor(Color.Gray)
+                      .margin({top:10})
+
+                    Text('限制长度是330px')
+                      .width('50%')
+                      .fontColor(Color.Gray)
+                      .margin({top:10})
+
+                    Text('这里是按照搜索热排')
+                      .width('50%')
+                      .fontColor(Color.Gray)
+                      .margin({top:10})
+
+                    Text('限制长度是330px')
+                      .width('50%')
+                      .fontColor(Color.Gray)
+                      .margin({top:10})
+
                   }
                 }.padding(20)
               }
@@ -97,7 +153,7 @@ struct searchPage{
           }
           if(this.searchText==='')
             searchListView().layoutWeight(1)
-        }.justifyContent(FlexAlign.Start)
+        }.justifyContent(FlexAlign.Start).height('100%')
       }.height('100%')
     }.title('刷个面试题')
     .titleMode(NavigationTitleMode.Mini)
