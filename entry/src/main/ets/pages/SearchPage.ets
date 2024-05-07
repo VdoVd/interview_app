@@ -10,12 +10,13 @@ struct searchPage{
   @State arr:string[]=[]
   @State searchText:string=''
   @State delete:boolean=false
-  @Provide isSearch:boolean=false
-  @Provide keyword:string=''
-  @Provide isSearchSuccess:boolean=false
+  @Provide @Watch('finishLoadData') keyword:string=''
   @StorageLink('topHeight') topHeight:number=0
-  @Provide isFinishLoad:boolean=false
+  @State isClick:boolean=false
+  @State showSearchContent:boolean=false
+  finishLoadData(){
 
+  }
   async saveData(text:string){
     const pre = preferences.getPreferencesSync(getContext(),{name:'store'})
     let kwList = pre.getSync('keyword',[]) as string[]
@@ -25,11 +26,8 @@ struct searchPage{
   }
 
   async getData(){
-
     const pre = preferences.getPreferencesSync(getContext(),{name:'store'})
-
     this.arr=[...(pre.getSync('keyword',[]) as string[])]
-
   }
 
   async delData(text?:string){
@@ -43,15 +41,18 @@ struct searchPage{
     }
     await pre.flush()
   }
+
   async delAll(){
     const pre = await preferences.getPreferences(getContext(), { name: 'store' })
     pre.deleteSync("keyword")
     await pre.flush()
     await this.getData()
   }
+
   onPageShow(): void {
     this.getData()
   }
+
   @Builder
   skeletonBuilder(){
       Column(){
@@ -64,6 +65,7 @@ struct searchPage{
         })
       }
   }
+
   build() {
     Navigation(){
       Scroll(){
@@ -71,17 +73,20 @@ struct searchPage{
           Column({space:10}){
             Row({space:10}){
               TextInput({placeholder:'请输入关键字',text:$$this.searchText})
+                .onClick(()=>{
+                  this.isClick=true
+                  this.showSearchContent=false
+                })
                 .onChange(()=>{
-                  this.isFinishLoad=false
-                  this.isSearchSuccess=false
+                  this.showSearchContent=false
                 })
                 .onSubmit(()=>{
                   this.saveData(this.searchText)
                   this.getData()
                   this.keyword=this.searchText
                   this.searchText=''
-                  this.isSearch=true
-                  this.isSearchSuccess=true
+                  this.isClick=false
+                  this.showSearchContent=true
                 })
                 .layoutWeight(1)
               if(this.searchText!='')
@@ -89,70 +94,82 @@ struct searchPage{
                   .fontColor(Color.Gray)
                   .onClick(()=>{this.searchText=''})
             }
-            if(this.isFinishLoad===false){
-              Row(){
-                Text('搜索记录').layoutWeight(1).fontWeight(FontWeight.Bold).textAlign(TextAlign.Start).width('93%')
-                if(this.delete===false)
-                  Image($r('app.media.ic_common_delete'))
-                    .width(20)
-                    .onClick(()=>{
-                      this.delete=true
-                    })
-                else{
-                  Row({space:10}){
-                    Text('全部删除').fontColor(Color.Gray).fontSize(13).onClick(()=>{
-                      this.delData()
-                    })
-                    Text('|').fontSize(13).fontColor(Color.Gray)
-                    Text('完成').fontColor(Color.Gray).fontSize(13).onClick(()=>{
-                      this.delete=false
-                    })
-                  }
-                }
-              }
-              .width('90%')
+
               Column(){
-                Flex({wrap:FlexWrap.Wrap}){
-                  ForEach(this.arr,(item:string,index:number)=>{
-                    Row(){this.flexTextBuilder(item)}.onClick(()=>{
-                    })
-                  })
-                }
-                .width('93%')
-                Column(){
-                  Row(){
-                    Text('搜索热榜').fontWeight(FontWeight.Bolder).fontSize(20)
-                    Text('换一换').fontColor(Color.Gray).fontSize(12)
-                  }.width('100%').justifyContent(FlexAlign.SpaceBetween)
-                  Flex({wrap:FlexWrap.Wrap}){
-
-                    Text('这里是按照搜索热排')
-                      .width('50%')
-                      .fontColor(Color.Gray)
-                      .margin({top:10})
-
-                    Text('限制长度是330px')
-                      .width('50%')
-                      .fontColor(Color.Gray)
-                      .margin({top:10})
-
-                    Text('这里是按照搜索热排')
-                      .width('50%')
-                      .fontColor(Color.Gray)
-                      .margin({top:10})
-
-                    Text('限制长度是330px')
-                      .width('50%')
-                      .fontColor(Color.Gray)
-                      .margin({top:10})
-
+                Row(){
+                  Text('搜索记录').layoutWeight(1).fontWeight(FontWeight.Bold).textAlign(TextAlign.Start).width('93%')
+                  if(this.delete===false)
+                    Image($r('app.media.ic_common_delete'))
+                      .width(20)
+                      .onClick(()=>{
+                        this.delete=true
+                      })
+                  else{
+                    Row({space:10}){
+                      Text('全部删除').fontColor(Color.Gray).fontSize(13).onClick(()=>{
+                        this.delData()
+                        this.getData()
+                      })
+                      Text('|').fontSize(13).fontColor(Color.Gray)
+                      Text('完成').fontColor(Color.Gray).fontSize(13).onClick(()=>{
+                        this.delete=false
+                      })
+                    }
                   }
-                }.padding(20)
+                }
+                .width('90%')
+                Column(){
+                  Flex({wrap:FlexWrap.Wrap}){
+                    ForEach(this.arr,(item:string,index:number)=>{
+                      Row(){this.flexTextBuilder(item)}.onClick(()=>{
+                        this.keyword=item
+                        this.showSearchContent=true
+                        console.log('item')
+                      })
+                    })
+                  }
+                  .width('93%')
+                  Column(){
+                    Row(){
+                      Text('搜索热榜').fontWeight(FontWeight.Bolder).fontSize(20)
+                      Text('换一换').fontColor(Color.Gray).fontSize(12)
+                    }.width('100%').justifyContent(FlexAlign.SpaceBetween)
+                    Flex({wrap:FlexWrap.Wrap}){
+
+                      Text('这里是按照搜索热排')
+                        .width('50%')
+                        .fontColor(Color.Gray)
+                        .margin({top:10})
+
+                      Text('限制长度是330px')
+                        .width('50%')
+                        .fontColor(Color.Gray)
+                        .margin({top:10})
+
+                      Text('这里是按照搜索热排')
+                        .width('50%')
+                        .fontColor(Color.Gray)
+                        .margin({top:10})
+
+                      Text('限制长度是330px')
+                        .width('50%')
+                        .fontColor(Color.Gray)
+                        .margin({top:10})
+
+                    }
+                  }.padding(20)
+                }
               }
-            }
+              .onClick(()=>{
+                this.isClick=false
+              })
+
           }
-          if(this.searchText==='')
+          if(this.showSearchContent&&this.isClick===false)
             searchListView().layoutWeight(1)
+              .onClick(()=>{
+                console.log(`click is:${this.isClick}`)
+              })
         }.justifyContent(FlexAlign.Start).height('100%')
       }.height('100%')
     }.title('刷个面试题')

@@ -7,12 +7,12 @@ import { IvSkeleton } from '../../common/components/IvSkeleton'
 @Component
 export default struct searchListView{
 
-  @Consume keyword:string
+  @Consume @Watch("searchReq") keyword:string
   @State listItems:homeSubItemModel[]=[]
   @State loadingFlag:boolean=true
-  @Consume @Watch("searchReq")  isSearch:boolean
-  @Consume @Watch("searchReq") isSearchSuccess:boolean
-  @Consume isFinishLoad:boolean
+  @State refreshing:boolean=false
+  @State page:number=1
+  @State timeId:number=0
   @Builder
   skeletonBuilder(){
     Column(){
@@ -25,42 +25,56 @@ export default struct searchListView{
     }
   }
   searchReq(){
-    if(this.isSearch===true) {
+      console.log('start search')
+      this.page=1
       this.loadingFlag = true
       this.loading()
-    }
+
   }
   private async loading() {
+    if(this.keyword==='')return
     console.log('start loading...')
     let req = http.createHttp()
-    const res = await req.request(`https://api-harmony-teach.itheima.net/hm/question/list?questionBankType=10&keyword=vue`)
+    const res = await req.request(`https://api-harmony-teach.itheima.net/hm/question/list?questionBankType=10&keyword=${this.keyword}&page=${this.page}`)
     let result = (JSON.parse(res.result.toString()) as allResponse<homeSubListModel>).data.rows
-    if(result!=undefined)this.isSearchSuccess=true
+    console.log(`res is:${res.result}`)
     this.listItems = result
-    this.isSearch=false
     this.loadingFlag=false
     this.keyword=''
-    this.isFinishLoad=true
     console.log('end loading...')
   }
   build() {
-    Column(){
+    Scroll(){
+      Column(){
+        Button('ok')
+        Refresh({refreshing:$$this.refreshing}){
+          List(){
 
+              ForEach(this.listItems,(item:homeSubItemModel,index:number)=>{
+                ListItem(){
+                  HomeSubListItemView({item:item})
+                }
+              })
 
-      List(){
-        if(this.isSearchSuccess=true)
-        ForEach(this.listItems,(item:homeSubItemModel,index:number)=>{
-          ListItem(){
-            HomeSubListItemView({item:item})
-          }
-        })
-        else
-        ListItem(){
-          Text('load...')
-          this.skeletonBuilder()
+            ListItem(){
+              Text('load...')
+              this.skeletonBuilder()
+            }
+          }.width('100%').padding(20).layoutWeight(1)
         }
-      }.width('100%').padding(20).layoutWeight(1)
+        .onRefreshing(()=>{
+          clearTimeout(this.timeId)
+          this.timeId=setTimeout(()=>{
 
-    }
+            this.page++
+
+            this.loading()
+
+            this.refreshing=false
+
+          },300)
+        })
+      }
+    }.height('100%')
   }
 }
