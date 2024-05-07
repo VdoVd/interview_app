@@ -1,6 +1,7 @@
 import { IvSkeleton } from '../common/components/IvSkeleton'
 import searchListView from '../views/search/searchList'
 import { preferences } from '@kit.ArkData'
+import testWatch from '../views/search/testWatch'
 
 PersistentStorage.persistProp<string[]>('searchRecord',[])
 
@@ -10,13 +11,15 @@ struct searchPage{
   @State arr:string[]=[]
   @State searchText:string=''
   @State delete:boolean=false
-  @Provide @Watch('finishLoadData') keyword:string=''
+  @Provide  word:string=''
   @StorageLink('topHeight') topHeight:number=0
   @State isClick:boolean=false
   @State showSearchContent:boolean=false
-  finishLoadData(){
-
+  @Provide num:number=0
+  change(){
+    console.log(`keyword:${this.word}`)
   }
+
   async saveData(text:string){
     const pre = preferences.getPreferencesSync(getContext(),{name:'store'})
     let kwList = pre.getSync('keyword',[]) as string[]
@@ -76,14 +79,17 @@ struct searchPage{
                 .onClick(()=>{
                   this.isClick=true
                   this.showSearchContent=false
+                  console.log('click true')
                 })
                 .onChange(()=>{
-                  this.showSearchContent=false
+                  console.log('onchange true')
                 })
                 .onSubmit(()=>{
+                  console.log('submit')
                   this.saveData(this.searchText)
                   this.getData()
-                  this.keyword=this.searchText
+                  this.word=this.searchText
+                  console.log(`keyword:${this.word}`)
                   this.searchText=''
                   this.isClick=false
                   this.showSearchContent=true
@@ -94,7 +100,7 @@ struct searchPage{
                   .fontColor(Color.Gray)
                   .onClick(()=>{this.searchText=''})
             }
-
+            if(this.showSearchContent===false&&this.isClick===true)
               Column(){
                 Row(){
                   Text('搜索记录').layoutWeight(1).fontWeight(FontWeight.Bold).textAlign(TextAlign.Start).width('93%')
@@ -122,7 +128,7 @@ struct searchPage{
                   Flex({wrap:FlexWrap.Wrap}){
                     ForEach(this.arr,(item:string,index:number)=>{
                       Row(){this.flexTextBuilder(item)}.onClick(()=>{
-                        this.keyword=item
+                        this.word=item
                         this.showSearchContent=true
                         console.log('item')
                       })
@@ -165,11 +171,13 @@ struct searchPage{
               })
 
           }
-          if(this.showSearchContent&&this.isClick===false)
-            searchListView().layoutWeight(1)
+
+            searchListView()
+              .layoutWeight(1)
               .onClick(()=>{
                 console.log(`click is:${this.isClick}`)
               })
+
         }.justifyContent(FlexAlign.Start).height('100%')
       }.height('100%')
     }.title('刷个面试题')

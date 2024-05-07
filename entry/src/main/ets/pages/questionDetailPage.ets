@@ -14,6 +14,8 @@ struct questionDetailPage{
 
   @StorageLink('subList') list:homeSubItemModel[]=[]
 
+  @StorageLink('topHeight') topHeight:number=0
+
   @State select:boolean=false
 
   @State loading:boolean=false
@@ -244,6 +246,7 @@ struct questionDetailPage{
       .zIndex(this.select?1:-1)
       .opacity(this.select?1:0)
     }
+    .padding({top:this.topHeight})
 
   }
 
