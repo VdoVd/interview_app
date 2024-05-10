@@ -7,7 +7,7 @@ import { BusinessError } from '@kit.BasicServicesKit'
 
 type HdParams = Record<string, number | string | boolean>
 
-class HdHttp {
+export class HdHttp {
   private baseUrl: string
 
   constructor(baseUrl: string) {

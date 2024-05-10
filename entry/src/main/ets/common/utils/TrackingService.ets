@@ -1,6 +1,10 @@
 import { http } from '@kit.NetworkKit';
 import { allResponse, tracking } from './myReq';
 import { promptAction } from '@kit.ArkUI';
+import { HdHttp } from './request';
+import { userAuth } from '@kit.UserAuthenticationKit';
+import { authStore } from './Auth';
+
 
 export interface iTimeList {
   /**
@@ -54,18 +58,24 @@ class TrackingService {
 
   // 4. 把收集好的数据请求服务器接口提交时长数据
   async save() {
-
+    let user=authStore.getUser()
     let req=http.createHttp()
-
-    const res=await tracking()
-
-    const result=JSON.parse(res.result.toString()) as allResponse<string>
-
-    console.log(`studyTimeSave:${result.message}`)
-
-    if(result.success===true)
-    promptAction.showToast({message:`study time save success`})
-
+    let token=user.token
+    const res =await req.request('https://api-harmony-teach.itheima.net/hm/time/tracking',{
+      method:http.RequestMethod.POST,
+      header:{
+        contentType: 'application/json',
+        Authorization:`Bearer ${token}`,
+      },
+      extraData:{timeList:[this.timelist]}
+    })
+    const result=(res.result as allResponse<string>).success
+    if(result){
+      console.log('tracking success')
+    }else {
+      console.log(`res is:${JSON.stringify(res.result)}`)
+      console.log('tracking failed')
+    }
   }
 }
 

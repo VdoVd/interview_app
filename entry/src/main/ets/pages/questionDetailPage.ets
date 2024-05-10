@@ -5,6 +5,7 @@ import { authStore } from '../common/utils/Auth'
 import { http } from '@kit.NetworkKit'
 import { allResponse, getLikeOrCollect } from '../common/utils/myReq'
 import { homeSubItemModel } from '../models/homeSubListModel'
+import { trackingService } from '../common/utils/TrackingService'
 
 let token=authStore.getUser().token
 
@@ -29,6 +30,18 @@ struct questionDetailPage{
   @State likeFlag:boolean=false
 
   @State pageIndex:number=0
+
+  aboutToAppear(): void {
+
+    trackingService.setStartTime()
+    trackingService.setQuestionId(this.qId)
+
+  }
+
+  aboutToDisappear(): void {
+    trackingService.setEndTime()
+    trackingService.save()
+  }
 
   async refreshPage(){
     await axios.get<questionDetail,AxiosResponse<questionDetail>,null>(`https://api-harmony-teach.itheima.net/hm/question/${this.qId}`, { headers:{ Authorization:`Bearer ${token}`, } })
