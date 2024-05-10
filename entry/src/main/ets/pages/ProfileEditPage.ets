@@ -73,6 +73,7 @@ struct ProfileEditPage {
     //   5.1 缓存文件路径
     let uploadFilePath = `internal://cache/${fullFileName}`
 
+    this.dialog.open()
 
     //   5.2 准备reqeust
      let uploador = await request.uploadFile(getContext(), {
@@ -89,22 +90,23 @@ struct ProfileEditPage {
       files: [{ name: 'file', uri: uploadFilePath, filename: fullFileName, type: ext }],
       data: [] // 因为本接口除了上传文件之外，无需接收其他文本数据，所以空着即可
     })
-
+    let i=0
     //   5.3 注册uploador对象上的两个事件，一个是progress用来监听上传进度，一个是fail用来监听上传失败的异常获取
     uploador.on('progress', (uploadSize, totalSize) => {
       //  这个回调函数是随着文件的上传会被不间断的触发执行，每次的uploadSize的值会增加，但是totalSize永远都是当前上传图片的大小
       //   所以我们可以通过判断 uploadSize === totalSize 表示上传完成，我们就可以做完成后端 逻辑处理
       let parcenStr = ((uploadSize/totalSize)*100).toFixed(0).toString()
+      console.log(`times:${i++}`)
       Logger.info('上传:',uploadSize + ' / '+ totalSize)
       console.log(`uploadSize:${uploadSize}`)
       emitter.emit({eventId:0},{
         data:{
-          msg:'完成:'+parcenStr+'%%%%%%%%%%%%%'
+          msg:'完成:'+parcenStr+'%'
         }
       })
       if(uploadSize === totalSize){
         AlertDialog.show({message:'图片上传完成'})
-        this.dialog.close()
+        // this.dialog.close()
       }
       //   由于此函数会被多次调用，所以我们可以在这个函数中计算处当前上传的进度百分比
     })
@@ -115,6 +117,7 @@ struct ProfileEditPage {
     })
 
     this.RefreshUserData()
+    // this.dialog.close()
   }
 
   async RefreshUserData(){
