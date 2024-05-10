@@ -161,9 +161,9 @@ export const getClockInDays=()=>{
 
 }
 
-export const getUserInfo=()=>{
+export const getUserInfoGetMethod=()=>{
   return req.request('https://api-harmony-teach.itheima.net/hm/userInfo',{
-    method:http.RequestMethod.POST,
+    method:http.RequestMethod.GET,
     header:{
       contentType: 'application/json',
       Authorization:`Bearer ${token}`,
