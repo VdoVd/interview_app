@@ -11,6 +11,7 @@
     "pages/ProfileEditPage",
     "pages/studyTimePage",
     "pages/wordPage",
-    "pages/ProjectDetailComp"
+    "pages/ProjectDetailComp",
+    "pages/InterviewDetailComp"
   ]
 }

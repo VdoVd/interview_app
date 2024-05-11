@@ -8,6 +8,7 @@ import { window } from '@kit.ArkUI'
 @Entry
 @Component
 struct Index {
+
   @State currentIndex: number = 0
 
   @Builder

@@ -19,12 +19,7 @@ export struct Home {
   @State clickCount:number=0
 
   aboutToDisappear(): void {
-    window.getLastWindow(getContext()).then(win => {
 
-      win.setWindowSystemBarProperties({statusBarContentColor:'#FFFFFF'}) // 白色
-
-      AppStorage.setOrCreate('topHeight',0)
-    })
   }
 
   async aboutToAppear(): Promise<void> {

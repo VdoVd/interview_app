@@ -215,3 +215,18 @@ export const getQuestionList=(id:number,sort?:number)=>{
     return req.request(`https://api-harmony-teach.itheima.net/hm/question/list?id=${id}&questionBankType=10&sort=${sort}`)
 
 }
+
+export const getInterviewList= async (questionType:number,page?:number,sort?:number)=>{
+  const res=await req.request(`https://api-harmony-teach.itheima.net/hm/question/list?questionBankType=${questionType}&page=${page}&sort=${sort}`)
+  console.log(`get interview is:${JSON.stringify(res.result)}`)
+  return res
+}
+
+export const getInterviewDetail = async  (id:string)=>{
+  return await req.request(`https://api-harmony-teach.itheima.net/hm/question/${id}`,{
+    method:http.RequestMethod.GET,
+    header:{
+      Authorization:`Bearer ${token}`,
+    }
+  })
+}
