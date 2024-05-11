@@ -1,6 +1,8 @@
 import { router } from '@kit.ArkUI'
 import { HdClockIn } from '../../common/components/HdClockIn'
 import { authStore, HdUser } from '../../common/utils/Auth'
+import { allResponse, studyInfo } from '../../common/utils/myReq'
+import { StudyData } from '../../models/StudyInfo'
 
 
 interface Nav {
@@ -87,7 +89,14 @@ export default struct MineContentView {
       }
     })
   }
-
+  @State time:string=''
+  async aboutToAppear(): Promise<void> {
+    const res = await studyInfo()
+    const result=JSON.parse(res.result.toString()) as allResponse<StudyData>
+    console.log(`result time:${JSON.stringify(result)}`)
+    console.log(`time:${result.data.totalTime.toString()}`)
+    this.time=(Math.floor(result.data.totalTime/3600)).toString()
+  }
   build() {
     Column({ space: 16 }) {
       Row({ space: 12 }) {
@@ -133,7 +142,7 @@ export default struct MineContentView {
         this.navBuilder({ icon: $r('app.media.ic_mine_collect'), name: '我的收藏' })
         this.navBuilder({ icon: $r('app.media.ic_mine_like'), name: '我的点赞' })
         this.navBuilder({
-          icon: $r('app.media.ic_mine_study'), name: '累计学时', other: '4 小时'
+          icon: $r('app.media.ic_mine_study'), name: '累计学时', other: `${this.time}小时`
         , onClick: () => {
             router.pushUrl({ url: 'pages/studyTimePage' })
           }

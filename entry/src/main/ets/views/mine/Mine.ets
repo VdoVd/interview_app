@@ -1,5 +1,7 @@
 import { HdClockIn } from '../../common/components/HdClockIn'
 import { window } from '@kit.ArkUI'
+import { studyInfo } from '../../common/utils/myReq'
+import { StudyData } from '../../models/StudyInfo'
 
 interface content{
   imgPath:Resource
@@ -15,8 +17,9 @@ export struct Mine {
     {imgPath:$r('app.media.ic_mine_like'),text:'我的点赞'},
     {imgPath:$r('app.media.ic_mine_study'),text:'累计学时'},
   ]
+  @State time:string=''
 
-  aboutToAppear(): void {
+  async aboutToAppear(): Promise<void> {
     window.getLastWindow(getContext()).then(win => {
       let area = win.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM)
       win.setWindowLayoutFullScreen(true)  // true：设置全屏
@@ -26,6 +29,7 @@ export struct Mine {
       let hvp = px2vp(h)  // 将px单位转换成vp单位
       AppStorage.setOrCreate('topHeight',hvp)  // 将高度保存到AppStorage中共享给其他页面使用
     })
+
   }
 
   aboutToDisappear(): void {
